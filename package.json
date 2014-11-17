@@ -1,6 +1,6 @@
 {
   "name": "gh-issue-updates",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Get the comments and events for an issue, in order",
   "scripts": {
     "test": "make test"
