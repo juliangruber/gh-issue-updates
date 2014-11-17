@@ -1,0 +1,18 @@
+{
+  "name": "gh-issue-updates",
+  "version": "0.0.0",
+  "description": "Get the comments and events for an issue, in order",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": "juliangruber/gh-issue-updates",
+  "devDependencies": {
+    "tape": "*"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "collect-stream": "^1.0.0",
+    "hyperquest": "^1.0.1",
+    "once": "^1.3.1"
+  }
+}
