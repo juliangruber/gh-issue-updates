@@ -13,7 +13,7 @@ function updates(opts, cb){
   var gh = function(endpoint){
     var req = request('https://api.github.com' + endpoint);
     req.setHeader('User-Agent', 'juliangruber/gh-issue-updates');
-    if (opts.token) req.setHead('Authorization', opts.token);
+    if (opts.token) req.setHeader('Authorization', opts.token);
     return req;
   };
 
