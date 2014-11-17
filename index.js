@@ -17,7 +17,21 @@ function updates(opts, cb){
     return req;
   };
 
-  var comments, events;
+  var issue, comments, events;
+
+  var i = gh('/repos/' + opts.repo + '/issues/' + opts.issue);
+  collect(i, function(err, body){
+    if (err) return cb(err);
+    try {
+      issue = {
+        type: 'issue',
+        data: JSON.parse(body.toString())
+      };
+    } catch (err) {
+      return cb(err);
+    }
+    if (events && comments) next();
+  });
 
   var c = gh('/repos/' + opts.repo + '/issues/' + opts.issue + '/comments');
   collect(c, function(err, body){
@@ -32,7 +46,7 @@ function updates(opts, cb){
     } catch (err) {
       return cb(err);
     }
-    if (events) next();
+    if (issue && events) next();
   });
 
   var e = gh('/repos/' + opts.repo + '/issues/' + opts.issue + '/events');
@@ -48,11 +62,11 @@ function updates(opts, cb){
     } catch (err) {
       return cb(err);
     }
-    if (comments) next();
+    if (issue && comments) next();
   });
 
   var next = function(){
-    var out = comments.concat(events);
+    var out = [issue].concat(comments).concat(events);
     out.sort(function(a, b){
       return date(a.created_at) - date(b.created_at);
     });
