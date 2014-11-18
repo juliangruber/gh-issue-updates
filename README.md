@@ -1,7 +1,7 @@
 
 # gh-issue-updates
 
-  Get the comments and events for an issue, in order
+  Get all activity for an issue or pull request, in order.
 
 ## Example
 
