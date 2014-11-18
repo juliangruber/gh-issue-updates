@@ -27,6 +27,10 @@ function updates(opts){
   .pipe(JSONStream.parse('*'))
   .pipe(typeify('comment'));
 
+  var commitComments = gh('/repos/' + opts.repo + '/pulls/' + opts.issue + '/comments')
+  .pipe(JSONStream.parse('*'))
+  .pipe(typeify('commit comment'));
+
   var events = gh('/repos/' + opts.repo + '/issues/' + opts.issue + '/events')
   .pipe(JSONStream.parse('*'))
   .pipe(typeify('event'));
@@ -38,6 +42,7 @@ function updates(opts){
   return toStream.source(merge([
     toPull.source(issue),
     toPull.source(comments),
+    toPull.source(commitComments),
     toPull.source(events)
   ], cmp))
 }
