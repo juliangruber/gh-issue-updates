@@ -1,6 +1,6 @@
 {
   "name": "gh-issue-updates",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Get all activity for an issue or pull request, in order",
   "scripts": {
     "test": "make test"
