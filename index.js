@@ -1,14 +1,16 @@
 var assert = require('assert');
 var request = require('hyperquest');
-var collect = require('collect-stream');
-var once = require('once');
+var toStream = require('pull-stream-to-stream');
+var toPull = require('stream-to-pull-stream');
+var merge = require('pull-sorted-merge');
+var JSONStream = require('JSONStream');
+var through = require('through2');
 
 module.exports = updates;
-function updates(opts, cb){
+function updates(opts){
   assert(opts, 'settings required');
   assert(opts.repo, '.repo required');
   assert(opts.issue, '.issue required');
-  cb = once(cb);
   
   var gh = function(endpoint){
     var req = request('https://api.github.com' + endpoint);
@@ -17,61 +19,36 @@ function updates(opts, cb){
     return req;
   };
 
-  var issue, comments, events;
+  var issue = gh('/repos/' + opts.repo + '/issues/' + opts.issue)
+  .pipe(JSONStream.parse())
+  .pipe(typeify('issue'));
 
-  var i = gh('/repos/' + opts.repo + '/issues/' + opts.issue);
-  collect(i, function(err, body){
-    if (err) return cb(err);
-    try {
-      issue = {
-        type: 'issue',
-        data: JSON.parse(body.toString())
-      };
-    } catch (err) {
-      return cb(err);
-    }
-    if (events && comments) next();
-  });
+  var comments = gh('/repos/' + opts.repo + '/issues/' + opts.issue + '/comments')
+  .pipe(JSONStream.parse('*'))
+  .pipe(typeify('comment'));
 
-  var c = gh('/repos/' + opts.repo + '/issues/' + opts.issue + '/comments');
-  collect(c, function(err, body){
-    if (err) return cb(err);
-    try {
-      comments = JSON.parse(body.toString()).map(function(comment){
-        return {
-          type: 'comment',
-          data: comment
-        };
-      });
-    } catch (err) {
-      return cb(err);
-    }
-    if (issue && events) next();
-  });
+  var events = gh('/repos/' + opts.repo + '/issues/' + opts.issue + '/events')
+  .pipe(JSONStream.parse('*'))
+  .pipe(typeify('event'));
 
-  var e = gh('/repos/' + opts.repo + '/issues/' + opts.issue + '/events');
-  collect(e, function(err, body){
-    if (err) return cb(err);
-    try {
-      events = JSON.parse(body.toString()).map(function(event){
-        return {
-          type: 'event',
-          data: event
-        };
-      });
-    } catch (err) {
-      return cb(err);
-    }
-    if (issue && comments) next();
-  });
-
-  var next = function(){
-    var out = [issue].concat(comments).concat(events);
-    out.sort(function(a, b){
-      return date(a.created_at) - date(b.created_at);
-    });
-    cb(null, out);
+  var cmp = function(a, b){
+    return date(a.data.created_at) - date(b.data.created_at);
   };
+
+  return toStream.source(merge([
+    toPull.source(issue),
+    toPull.source(comments),
+    toPull.source(events)
+  ], cmp))
+}
+
+function typeify(t){
+  return through.obj(function(data, _, done){
+    done(null, {
+      type: t,
+      data: data
+    })
+  });
 }
 
 function date(str){
