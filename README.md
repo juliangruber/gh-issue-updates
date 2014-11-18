@@ -9,9 +9,22 @@
 var getUpdates = require('gh-issue-updates');
 
 getUpdates({
-  repo: 'octocat/Spoon-Knife',
-  issue: 3858
+  repo: 'rvagg/through2',
+  issue: 33
 }).on('data', console.log)
+```
+
+  Output:
+
+```bash
+$ node example.js
+{ type: 'issue',
+  data: '...' }
+{ type: 'commit comment',
+  data:  '...' }
+{ type: 'comment',
+  data:  '...' }
+...
 ```
 
 ## Installation
@@ -19,6 +32,13 @@ getUpdates({
 ```bash
 $ npm install gh-issue-updates
 ```
+
+## Emitted events
+
+  - issue
+  - comment
+  - commit comment
+  - event (assigned, merged, watched etc)
 
 ## License
 
