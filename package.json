@@ -11,7 +11,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "JSONStream": "^1.2.1",
+    "JSONStream": "^1.3.0",
     "hyperquest": "^2.1.0",
     "pull-sorted-merge": "^1.0.5",
     "pull-stream-to-stream": "^1.3.0",
